@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Generate temporary public catalog
+        run: npm run data:update
+
+      - name: Build and validate
+        run: npm test
+
+      - name: Verify secrets and generated data are not tracked
+        shell: pwsh
+        run: |
+          $tracked = git ls-files
+          $forbidden = $tracked | Select-String -Pattern 'operator-catalog\.json$|OperBox_Export\.json$|草稿.*\.json$|\.token$|^\.env'
+          if ($forbidden) {
+            $forbidden
+            throw 'A generated catalog, account export, draft, or credential file is tracked.'
+          }

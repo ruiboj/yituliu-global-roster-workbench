@@ -1,0 +1,18 @@
+{
+  "name": "arknights-yituliu-local-workbench",
+  "version": "3.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "data:update": "node scripts/fetch-public-data.mjs",
+    "prepare-data": "node scripts/prepare-data.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs dist && node scripts/validate.mjs dist",
+    "release:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1",
+    "release:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1 -IncludeRuntime",
+    "release:portable": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1 -IncludePortable"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

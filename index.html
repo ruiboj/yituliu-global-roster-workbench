@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="在本机导入 MAA 或 ArkPRTS 数据，补录专精与模组，并写入一图流。">
+  <title>一图流本地干员工作台</title>
+  <link rel="stylesheet" href="/assets/ui-standard.css">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#operator-workspace" data-zh="跳到干员列表" data-en="Skip to operator list">跳到干员列表</a>
+  <div class="app-shell">
+    <header class="app-header">
+      <span class="brand" data-zh="一图流本地干员工作台" data-en="Yituliu Local Roster Workbench">一图流本地干员工作台</span>
+      <nav class="menu-bar" aria-label="页面区域" data-aria-zh="页面区域" data-aria-en="Page sections">
+        <a href="#data-sources" data-zh="数据" data-en="Data">数据</a>
+        <a href="#operator-workspace" data-zh="干员" data-en="Operators">干员</a>
+        <a href="#safety" data-zh="安全" data-en="Safety">安全</a>
+      </nav>
+      <div class="command-center">
+        <label class="visually-hidden" for="search" data-zh="搜索干员" data-en="Search operators">搜索干员</label>
+        <input class="command-input" id="search" type="search" placeholder="搜索名称或 charId（快捷键 /）" data-placeholder-zh="搜索名称或 charId（快捷键 /）" data-placeholder-en="Search name or charId (shortcut /)" autocomplete="off">
+      </div>
+      <button class="button language-toggle" id="languageToggle" type="button" aria-label="Switch to English" title="Switch to English">EN</button>
+      <span class="memory-only" data-zh="Token 仅驻留本页内存" data-en="Tokens stay in page memory only">Token 仅驻留本页内存</span>
+    </header>
+
+    <div class="notice-bar danger-notice" role="alert">
+      <strong data-zh="高风险写入：" data-en="HIGH-RISK WRITE:">高风险写入：</strong>&nbsp;<span data-zh="一图流 OpenAPI 会整体替换远端干员数据；提交前必须检查 UID、已持有数量并下载草稿。" data-en="Yituliu OpenAPI replaces the entire remote roster. Verify the UID and owned count, then download a draft before submitting.">一图流 OpenAPI 会整体替换远端干员数据；提交前必须检查 UID、已持有数量并下载草稿。</span>
+    </div>
+
+    <nav class="app-rail" aria-label="工具快捷入口" data-aria-zh="工具快捷入口" data-aria-en="Workbench shortcuts">
+      <button class="rail-button" type="button" data-scroll="data-sources" aria-label="跳到数据导入" title="数据导入" data-aria-zh="跳到数据导入" data-aria-en="Go to data import" data-title-zh="数据导入" data-title-en="Data import">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h8"/></svg>
+      </button>
+      <button class="rail-button" type="button" data-scroll="operator-workspace" aria-label="跳到干员编辑器" title="干员编辑器" data-aria-zh="跳到干员编辑器" data-aria-en="Go to operator editor" data-title-zh="干员编辑器" data-title-en="Operator editor">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
+      </button>
+      <button class="rail-button rail-button--bottom" type="button" data-scroll="safety" aria-label="跳到安全说明" title="安全说明" data-aria-zh="跳到安全说明" data-aria-en="Go to safety information" data-title-zh="安全说明" data-title-en="Safety information">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6zM9 12l2 2 4-5"/></svg>
+      </button>
+    </nav>
+
+    <div class="tab-bar" aria-label="当前工作区" data-aria-zh="当前工作区" data-aria-en="Current workspace">
+      <span class="tab" aria-current="page" data-zh="干员练度编辑器" data-en="Operator Progression Editor">干员练度编辑器</span>
+      <span class="tab tab--state" id="catalogState" data-zh="正在读取公共目录…" data-en="Loading public catalog…">正在读取公共目录…</span>
+    </div>
+
+    <main class="main" id="main">
+      <div class="workbench-layout">
+        <aside class="control-pane" id="data-sources" aria-label="数据与账号设置" data-aria-zh="数据与账号设置" data-aria-en="Data and account settings">
+          <section class="panel" aria-labelledby="token-title">
+            <header class="panel-header">
+              <h2 class="panel-title" id="token-title" data-zh="一图流 Token" data-en="Yituliu Tokens">一图流 Token</h2>
+              <span class="square-status" id="serverStatus" data-state="pending" data-zh="检查中" data-en="Checking">检查中</span>
+            </header>
+            <div class="panel-body compact-form">
+              <div class="field">
+                <label for="readToken" data-zh="只读 Token" data-en="Read-only token">只读 Token</label>
+                <div class="secret-field">
+                  <input class="input" id="readToken" type="password" autocomplete="off" spellcheck="false">
+                  <button class="button button--quiet reveal-token" type="button" data-for="readToken" data-zh="显示" data-en="Show">显示</button>
+                </div>
+                <p class="field-help" data-zh="只用于读取你的远端练度。" data-en="Used only to read your remote progression.">只用于读取你的远端练度。</p>
+              </div>
+              <div class="field">
+                <label for="writeToken" data-zh="只写 Token" data-en="Write-only token">只写 Token</label>
+                <div class="secret-field">
+                  <input class="input" id="writeToken" type="password" autocomplete="off" spellcheck="false">
+                  <button class="button button--quiet reveal-token" type="button" data-for="writeToken" data-zh="显示" data-en="Show">显示</button>
+                </div>
+                <p class="field-help" data-zh="仅在最终确认写入时发送。" data-en="Sent only after final write confirmation.">仅在最终确认写入时发送。</p>
+              </div>
+              <button class="button button--primary full-width" id="readRemote" type="button" data-zh="读取一图流数据" data-en="Read from Yituliu">读取一图流数据</button>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="import-title">
+            <header class="panel-header"><h2 class="panel-title" id="import-title" data-zh="本地导入" data-en="Local import">本地导入</h2></header>
+            <div class="panel-body import-stack">
+              <label class="file-action">
+                <input id="maaFile" type="file" accept=".json,application/json">
+                <span data-zh="导入 MAA OperBox" data-en="Import MAA OperBox">导入 MAA OperBox</span>
+                <small data-zh="基础练度，保留已填专精与模组" data-en="Base progression; preserves entered masteries and modules">基础练度，保留已填专精与模组</small>
+              </label>
+              <label class="file-action file-action--experimental">
+                <input id="arkprtsFile" type="file" accept=".json,application/json">
+                <span data-zh="导入 ArkPRTS JSON" data-en="Import ArkPRTS JSON">导入 ArkPRTS JSON</span>
+                <small data-zh="实验性；读取完整基础、专精和模组" data-en="Experimental; imports base, mastery and module data">实验性；读取完整基础、专精和模组</small>
+              </label>
+              <label class="file-action">
+                <input id="draftFile" type="file" accept=".json,application/json">
+                <span data-zh="恢复本工具草稿" data-en="Restore workbench draft">恢复本工具草稿</span>
+                <small data-zh="不会恢复任何 Token" data-en="Never restores tokens">不会恢复任何 Token</small>
+              </label>
+              <div class="button-row">
+                <button class="button" id="downloadDraft" type="button" data-zh="下载草稿" data-en="Download draft">下载草稿</button>
+                <button class="button" id="refreshStats" type="button" data-zh="刷新推荐率" data-en="Refresh rates">刷新推荐率</button>
+              </div>
+              <p class="field-help" id="importStatus" data-zh="尚未导入玩家数据。" data-en="No player data imported yet.">尚未导入玩家数据。</p>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="profile-title">
+            <header class="panel-header"><h2 class="panel-title" id="profile-title" data-zh="写入资料" data-en="Upload profile">写入资料</h2></header>
+            <div class="panel-body compact-form">
+              <div class="field">
+                <label for="uid" data-zh="游戏 UID（必填）" data-en="Game UID (required)">游戏 UID（必填）</label>
+                <input class="input" id="uid" inputmode="numeric" autocomplete="off" placeholder="个人名片上的数字 ID" data-placeholder-zh="个人名片上的数字 ID" data-placeholder-en="Numeric ID shown on your profile card">
+                <p class="field-error" id="uidError" hidden></p>
+              </div>
+              <div class="field"><label for="nickName" data-zh="昵称" data-en="Nickname">昵称</label><input class="input" id="nickName" autocomplete="off" value="国际服玩家"></div>
+              <div class="field"><label for="channelName" data-zh="区服名称" data-en="Server label">区服名称</label><input class="input" id="channelName" value="国际服"></div>
+              <div class="field"><label for="channelMasterId" data-zh="渠道编号" data-en="Channel ID">渠道编号</label><input class="input" id="channelMasterId" type="number" value="0"></div>
+            </div>
+          </section>
+
+          <section class="panel safety-panel" id="safety" aria-labelledby="safety-title">
+            <header class="panel-header"><h2 class="panel-title" id="safety-title" data-zh="风险与隐私" data-en="Risks & privacy">风险与隐私</h2></header>
+            <div class="panel-body risk-copy">
+              <p class="risk-lead" data-zh="使用前请理解以下风险；本工具不能替你确认账号数据是否准确。" data-en="Understand these risks before use. This tool cannot verify that your account data is accurate.">使用前请理解以下风险；本工具不能替你确认账号数据是否准确。</p>
+              <ul class="risk-list">
+                <li data-zh="一图流写入是整体替换。错误 UID、漏识别或空数据可能覆盖正确记录。" data-en="Yituliu writes replace the whole roster. A wrong UID, missed scan, or empty data can overwrite correct records.">一图流写入是整体替换。错误 UID、漏识别或空数据可能覆盖正确记录。</li>
+                <li data-zh="MAA/OCR 和公开目录都可能识别错误或更新延迟；写入前必须人工核对。" data-en="MAA/OCR and public catalogs may be wrong or delayed. Manually verify before writing.">MAA/OCR 和公开目录都可能识别错误或更新延迟；写入前必须人工核对。</li>
+                <li data-zh="ArkPRTS 使用非官方 Yostar 私有接口，可能令游戏会话失效，并可能存在账号或服务条款风险。" data-en="ArkPRTS uses unofficial private Yostar endpoints. It may invalidate your game session and may carry account or terms-of-service risk.">ArkPRTS 使用非官方 Yostar 私有接口，可能令游戏会话失效，并可能存在账号或服务条款风险。</li>
+                <li data-zh="Token 具有数据权限；草稿仍含 UID、昵称和练度。不要上传或分享给他人。" data-en="Tokens grant data access, and drafts still contain UID, nickname, and progression. Do not upload or share them.">Token 具有数据权限；草稿仍含 UID、昵称和练度。不要上传或分享给他人。</li>
+                <li data-zh="推荐率只描述样本玩家投入，不代表技能强度、攻略结论或账号建议。" data-en="Popularity rates describe sampled investment only; they are not strength rankings, strategy conclusions, or account advice.">推荐率只描述样本玩家投入，不代表技能强度、攻略结论或账号建议。</li>
+              </ul>
+              <p class="risk-stop" data-zh="如果不能接受以上风险，请只使用 MAA/手动编辑和草稿导出，不要填写 Token，也不要运行 ArkPRTS。" data-en="If you do not accept these risks, use only MAA/manual editing and draft export. Do not enter tokens or run ArkPRTS.">如果不能接受以上风险，请只使用 MAA/手动编辑和草稿导出，不要填写 Token，也不要运行 ArkPRTS。</p>
+              <button class="button button--danger-outline" id="openArkprtsHelp" type="button" data-zh="查看 ArkPRTS 风险说明" data-en="Review ArkPRTS risk details">查看 ArkPRTS 风险说明</button>
+            </div>
+          </section>
+        </aside>
+
+        <section class="workspace" id="operator-workspace" aria-labelledby="workspace-title">
+          <header class="workspace-header">
+            <div>
+              <h1 id="workspace-title" data-zh="干员练度" data-en="Operator progression">干员练度</h1>
+              <p id="sourceInfo" data-zh="等待公共目录载入。" data-en="Waiting for public catalog.">等待公共目录载入。</p>
+            </div>
+            <div class="workspace-actions">
+              <button class="button" id="runCheck" type="button" data-zh="运行完整检查" data-en="Run full check">运行完整检查</button>
+              <button class="button button--primary" id="reviewUpload" type="button" data-zh="检查并写入一图流" data-en="Review and write to Yituliu">检查并写入一图流</button>
+            </div>
+          </header>
+
+          <div class="summary-grid" id="summary" aria-label="练度摘要" data-aria-zh="练度摘要" data-aria-en="Progression summary"></div>
+
+          <div class="toolbar panel" aria-label="筛选和批量操作" data-aria-zh="筛选和批量操作" data-aria-en="Filters and batch actions">
+            <div class="toolbar-group">
+              <label for="sort" data-zh="排序" data-en="Sort">排序</label>
+              <select class="select" id="sort">
+                <option value="progress" data-zh="练度从高到低" data-en="Progression: high to low">练度从高到低</option>
+                <option value="recommendation" data-zh="推荐率从高到低" data-en="Rate: high to low">推荐率从高到低</option>
+                <option value="rarity" data-zh="星级从高到低" data-en="Rarity: high to low">星级从高到低</option>
+                <option value="name" data-zh="名称" data-en="Name">名称</option>
+                <option value="issues" data-zh="问题优先" data-en="Issues first">问题优先</option>
+              </select>
+            </div>
+            <label class="check-control"><input id="ownedOnly" type="checkbox" checked><span data-zh="只看已持有" data-en="Owned only">只看已持有</span></label>
+            <label class="check-control"><input id="e260Only" type="checkbox"><span data-zh="只看精二 60+" data-en="E2 Lv.60+ only">只看精二 60+</span></label>
+            <label class="check-control"><input id="issuesOnly" type="checkbox"><span data-zh="只看需检查" data-en="Issues only">只看需检查</span></label>
+            <button class="button" id="resetFilters" type="button" data-zh="重置筛选" data-en="Reset filters">重置筛选</button>
+            <button class="button" id="safeFix" type="button" data-zh="补齐明显依赖" data-en="Fill clear prerequisites">补齐明显依赖</button>
+          </div>
+
+          <div class="data-table-wrap roster-table-wrap" tabindex="0" role="region" aria-label="干员练度表；窄屏可横向滚动" data-aria-zh="干员练度表；窄屏可横向滚动" data-aria-en="Operator progression table; scroll horizontally on narrow screens">
+            <table class="data-table roster-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-zh="干员" data-en="Operator">干员</th>
+                  <th scope="col" data-zh="基础练度" data-en="Base progression">基础练度</th>
+                  <th scope="col" data-zh="技能与专精" data-en="Skills & mastery">技能与专精</th>
+                  <th scope="col" data-zh="可用模组" data-en="Available modules">可用模组</th>
+                  <th scope="col" data-zh="一键推荐（精二 60+）" data-en="Quick picks (E2 Lv.60+)">一键推荐（精二 60+）</th>
+                  <th scope="col" data-zh="检查" data-en="Check">检查</th>
+                </tr>
+              </thead>
+              <tbody id="operatorRows"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" hidden>
+              <strong data-zh="当前筛选下没有干员" data-en="No operators match these filters">当前筛选下没有干员</strong>
+              <p data-zh="先导入 MAA、ArkPRTS 或一图流数据，也可以关闭“只看已持有”。" data-en="Import MAA, ArkPRTS, or Yituliu data, or turn off Owned only.">先导入 MAA、ArkPRTS 或一图流数据，也可以关闭“只看已持有”。</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="app-statusbar">
+      <span id="statusText" data-zh="初始化" data-en="Initializing">初始化</span>
+      <span id="recommendationTime" data-zh="推荐率：内置快照" data-en="Rates: bundled snapshot">推荐率：内置快照</span>
+      <span data-zh="本地 127.0.0.1" data-en="Local 127.0.0.1">本地 127.0.0.1</span>
+    </footer>
+  </div>
+
+  <dialog class="dialog" id="uploadDialog" aria-labelledby="upload-title">
+    <form method="dialog" id="uploadForm">
+      <header class="dialog-header">
+        <h2 id="upload-title" data-zh="确认整体替换" data-en="Confirm full replacement">确认整体替换</h2>
+        <button class="chrome-button" value="cancel" aria-label="关闭写入确认" data-aria-zh="关闭写入确认" data-aria-en="Close write confirmation" data-zh="关闭" data-en="Close">关闭</button>
+      </header>
+      <div class="dialog-body">
+        <p class="danger-callout" data-zh="警告：本次写入会用当前“已持有”列表整体替换一图流上的干员练度。错误或遗漏不会自动恢复，请先下载草稿。" data-en="WARNING: This write replaces the entire Yituliu roster with the current Owned list. Errors and omissions are not automatically recoverable. Download a draft first.">警告：本次写入会用当前“已持有”列表整体替换一图流上的干员练度。错误或遗漏不会自动恢复，请先下载草稿。</p>
+        <dl class="review-grid" id="uploadReview"></dl>
+        <label class="check-control confirm-control">
+          <input id="confirmReplace" type="checkbox">
+          <span data-zh="我已核对 UID 和数量，并理解这是不可自动撤销的整体替换。" data-en="I verified the UID and count and understand this full replacement cannot be automatically undone.">我已核对 UID 和数量，并理解这是不可自动撤销的整体替换。</span>
+        </label>
+      </div>
+      <footer class="dialog-actions">
+        <button class="button" value="cancel" data-zh="取消" data-en="Cancel">取消</button>
+        <button class="button button--danger" id="confirmUpload" type="button" disabled data-zh="整体替换一图流数据" data-en="Replace Yituliu roster">整体替换一图流数据</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="arkprtsDialog" aria-labelledby="arkprts-title">
+    <form method="dialog">
+      <header class="dialog-header">
+        <h2 id="arkprts-title" data-zh="ArkPRTS 实验导入" data-en="Experimental ArkPRTS import">ArkPRTS 实验导入</h2>
+        <button class="chrome-button" value="cancel" aria-label="关闭实验导入说明" data-aria-zh="关闭实验导入说明" data-aria-en="Close experimental import information" data-zh="关闭" data-en="Close">关闭</button>
+      </header>
+      <div class="dialog-body prose arkprts-risk-detail">
+        <p data-zh="更安全的默认路径仍是 MAA 或手动编辑。只有在你主动接受风险后，才运行源码包中的实验导出器。" data-en="MAA or manual editing remains the safer default. Run the experimental exporter only after you knowingly accept the risks.">更安全的默认路径仍是 MAA 或手动编辑。只有在你主动接受风险后，才运行源码包中的实验导出器。</p>
+        <p data-zh="导出器不会保存验证码、Yostar UID、Yostar Token 或会话密钥，但登录本身使用非官方私有接口，可能使当前客户端重新登录，可能随时失效，并可能违反账号政策或服务条款。" data-en="The exporter does not save verification codes, Yostar UID, Yostar tokens, or session keys. However, login uses unofficial private endpoints, may force the current client to log in again, may stop working without notice, and may conflict with account policies or terms of service.">导出器不会保存验证码、Yostar UID、Yostar Token 或会话密钥，但登录本身使用非官方私有接口，可能使当前客户端重新登录，可能随时失效，并可能违反账号政策或服务条款。</p>
+        <p data-zh="不要把验证码、Token、原始 syncData 或草稿上传到 Issue。支持 EN / JP / KR；不支持台服登录。" data-en="Never upload verification codes, tokens, raw syncData, or drafts to an issue. EN, JP, and KR are supported; TW login is not.">不要把验证码、Token、原始 syncData 或草稿上传到 Issue。支持 EN / JP / KR；不支持台服登录。</p>
+      </div>
+      <footer class="dialog-actions"><button class="button button--danger-outline" value="cancel" data-zh="我已阅读" data-en="I have read this">我已阅读</button></footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <strong id="toastTitle"></strong>
+    <span id="toastMessage"></span>
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

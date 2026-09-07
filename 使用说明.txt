@@ -1,0 +1,6 @@
+Windows x64: 解压后双击 Start.cmd，首次联网下载公共目录，随后自动打开浏览器。
+保留命令窗口；退出前下载草稿，关闭命令窗口停止服务。
+无需安装 Node.js 或手动打开 HTML。
+完整中文说明：README.zh-CN.md；English: README.md。
+更新目录：先保存草稿，再运行 Update-catalog.cmd。
+写入一图流会整体替换远端列表，请先核对并备份。

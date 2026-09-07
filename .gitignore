@@ -1,0 +1,27 @@
+# Generated builds and release packages
+dist/
+outputs/
+release/
+
+# Generated public-data snapshot. See data/README.md and THIRD_PARTY_NOTICES.md.
+data/operator-catalog.json
+
+# Player exports and credentials must never be committed.
+ArkPRTS_OperBox_Export.json
+Arknights_OperBox_Export.json
+*草稿*.json
+*.token
+.env
+.env.*
+
+# Bundled runtime and local verification
+runtime/
+.qa/
+.qa-*
+
+# Tooling caches
+node_modules/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db

@@ -1,0 +1,50 @@
+name: Bug report / 错误报告
+description: Report a reproducible problem without sharing account data / 报告可复现问题，请勿分享账号数据
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never attach tokens, verification codes, raw syncData, personal drafts, or real account exports.** Use synthetic or minimized data only.
+
+        **禁止上传 Token、验证码、原始 syncData、个人草稿或真实账号导出。** 只能使用虚构或最小化数据。
+  - type: input
+    id: version
+    attributes:
+      label: Version / 版本
+      placeholder: v3.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Data path / 数据来源
+      options:
+        - Manual editing / 手动编辑
+        - MAA JSON
+        - Yituliu read / 一图流读取
+        - ArkPRTS sanitized JSON
+        - Draft restore / 草稿恢复
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps / 复现步骤
+      description: Use synthetic identifiers and remove all personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result / 预期与实际结果
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation / 隐私确认
+      options:
+        - label: I removed all credentials and personal account data / 我已移除全部凭据和个人账号数据
+          required: true

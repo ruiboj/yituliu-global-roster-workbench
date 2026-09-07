@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Verify tag matches package version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -Raw package.json | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME does not match package.json version $version"
+          }
+
+      - name: Validate the release
+        run: |
+          npm run data:update
+          npm test
+
+      - name: Prepare release files
+        shell: pwsh
+        env:
+          INCLUDE_RUNTIME: ${{ vars.ALLOW_THIRD_PARTY_DATA_REDISTRIBUTION }}
+        run: |
+          if ($env:INCLUDE_RUNTIME -eq 'true') {
+            ./scripts/package-release.ps1 -IncludeRuntime -IncludePortable
+          } else {
+            ./scripts/package-release.ps1 -IncludePortable
+            'Runtime ZIP omitted because third-party data redistribution was not explicitly enabled.' | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files = Get-ChildItem -LiteralPath release -File | ForEach-Object FullName
+          gh release create $env:GITHUB_REF_NAME $files --verify-tag --notes-file docs/release-notes.md --title $env:GITHUB_REF_NAME
