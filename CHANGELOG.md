@@ -2,6 +2,12 @@
 
 All notable changes are documented here. This project follows semantic versioning where practical.
 
+## 3.1.1 - 2026-09-07
+
+- Added bilingual Yituliu token setup instructions and a Personal Center screenshot.
+- Made the repository and release downloads public.
+- Updated the bundled documentation and vulnerability reporting instructions.
+
 ## 3.1.0 - 2026-09-07
 
 - Added a Windows x64 portable release with bundled Node.js and first-run public-data download.

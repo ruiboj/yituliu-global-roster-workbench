@@ -10,14 +10,14 @@ A local Arknights roster editor for Global players. Import a MAA export, fill in
 
 ## Download and open
 
-1. Open [the latest release](https://github.com/ruiboj/yituliu-global-roster-workbench/releases/latest). Download **Yituliu-Workbench-Windows-x64-v3.1.0.zip** under **Assets**. The GitHub “Source code” downloads are for development.
+1. Open [the latest release](https://github.com/ruiboj/yituliu-global-roster-workbench/releases/latest). Download **Yituliu-Workbench-Windows-x64-v3.1.1.zip** under **Assets**. The GitHub “Source code” downloads are for development.
 2. Right-click the ZIP and choose **Extract All**. Open the extracted folder.
 3. Double-click **Start.cmd**. On first launch, it downloads the public game catalog. Your browser opens automatically when it is ready.
 4. Keep the command window open while using the app. Save a draft before closing the browser; close the command window to stop the local server.
 
 No Node.js installation, terminal commands, administrator rights, or separate HTML-opening step are required. The package includes Node.js 22 for Windows x64. First launch needs internet access to GitHub and Yituliu; later local editing uses the saved catalog. Remote reads, writes, and statistics refreshes still need internet.
 
-The repository and its releases are currently **private**. Only the owner and people granted access can download them.
+The repository and release downloads are public. No GitHub account is needed to download the Windows ZIP.
 
 ## Import, edit, save
 
@@ -30,6 +30,19 @@ The repository and its releases are currently **private**. Only the owner and pe
 The quick mastery and module buttons are available for owned operators at E2 Lv.60 or above. They use the highest investment rates in Yituliu’s survey, not a strength ranking. Clicking one changes your draft; use it only when it matches your actual account. Some edits fill in prerequisites, such as skill level 7 for mastery, so review those changes too.
 
 **3 — Check and back up.** Run **Run full check**, resolve the errors, then choose **Download draft**. Use **Restore workbench draft** next time. Closing or refreshing the page discards unsaved edits. A draft contains progression and any profile details you entered, but no tokens.
+
+## Get your Yituliu tokens
+
+1. Sign in to your **Yituliu account**, then open [Personal Center / 个人中心](https://ark.yituliu.cn/account/home). You can also select **个人中心** near the bottom of the left sidebar.
+2. Find the **第三方 API Token** (Third-party API Token) card below your user information.
+3. Click **生成只读 TOKEN** (Generate read-only token). Copy the generated value into this workbench’s **Read-only token** field to load your Yituliu roster.
+4. If you want to save your edited roster to Yituliu, click **生成只写 TOKEN** (Generate write-only token) and paste that value into **Write-only token**. It is used only after you review and confirm the write.
+
+These are **Yituliu third-party API tokens**, not a CN Arknights game token or a Yostar login credential. Local import, editing, and draft saving still work without them.
+
+![Yituliu Personal Center: the Third-party API Token card contains separate read-only and write-only generation buttons](docs/screenshots/yituliu-tokens.png)
+
+The screenshot shows the Chinese site labels. **只读 = read-only; 只写 = write-only.** Yituliu allows one token of each permission type. If one already exists, delete the old token before generating its replacement; the old value will stop working, so update any tools using it. Keep generated values private.
 
 ## Send a roster to Yituliu (optional)
 

@@ -2,13 +2,13 @@
 
 Repository: https://github.com/ruiboj/yituliu-global-roster-workbench
 
-Keep the repository **private** until you deliberately decide to change its visibility. Releases inherit repository access; uploading a release does not make it public.
+The repository is public. Releases are available to everyone. Keep account data, tokens, and local drafts out of both Git history and release archives.
 
-## Tools on this computer
+## Publishing tools
 
-Git and GitHub Desktop were already installed. GitHub CLI is installed through WinGet and uses the existing GitHub credential for ruiboj, held in the Windows credential store. Never put a token in a script or repository file.
+Use Git and GitHub CLI, or GitHub Desktop. Authenticate through the tool’s normal sign-in flow and keep credentials in the operating system credential store. Never put a token in a script or repository file.
 
-The publishing checkout is `D:\Repos\Arknights temp tool\yituliu-global-roster-workbench`. In GitHub Desktop, use **File → Add local repository** and select that folder. Commit changes, then use **Push origin**. The repository has its origin configured; do not create another repository from the research folder.
+In GitHub Desktop, use **File → Add local repository** and select your checkout. Commit changes, then use **Push origin**. If origin is already configured, do not create another repository.
 
 ## Prepare a release
 
@@ -26,11 +26,11 @@ npm run release:portable
 5. Commit and push main. Wait for CI to pass before tagging:
 
 ```powershell
-git tag -a v3.1.0 -m "v3.1.0"
-git push origin v3.1.0
+git tag -a v3.1.1 -m "v3.1.1"
+git push origin v3.1.1
 ```
 
-The Release workflow creates the source ZIP, Windows portable ZIP, and SHA256SUMS.txt, then uploads them with docs/release-notes.md. Inspect the run and release with `gh run list` and `gh release view v3.1.0`. Check visibility with `gh repo view --json visibility`.
+The Release workflow creates the source ZIP, Windows portable ZIP, and SHA256SUMS.txt, then uploads them with docs/release-notes.md. Inspect the run and release with `gh run list` and `gh release view v3.1.1`. Check visibility with `gh repo view --json visibility`.
 
 For a first repository creation, use `gh repo create yituliu-global-roster-workbench --private --source . --remote origin --push`. Do not rerun this after origin exists.
 

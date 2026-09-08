@@ -19,6 +19,7 @@ const files = [
   'README.zh-CN.md',
   'docs/screenshots/workbench.png',
   'docs/screenshots/editing.png',
+  'docs/screenshots/yituliu-tokens.png',
   'DESIGN_AND_RISKS.md',
   'THIRD_PARTY_NOTICES.md',
   'LICENSE',
